@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Glass Type Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #000080;
+            color: #fff;
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: 5px solid #ffd700;
+        }
+        h1 {
+            margin: 0;
+            font-size: 36px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #333;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+        .form-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .form-column {
+            width: 48%;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #000080;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #ffd700;
+            color: #000;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 36px; /* Increase font size */
+            font-weight: bold; /* Make text bold */
+            text-align: center;
+            color: #ffd700;
+        }
+        #result-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #result-image {
+            max-width: 100%;
+            height: auto;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Glass Type Prediction</h1>
+    </header>
+    <div class="container">
+        <form id="glassForm">
+            <div class="form-container">
+                <div class="form-column">
+                    <label for="RI">RI:</label>
+                    <input type="text" id="RI" name="RI"><br>
+                    <label for="Na">Na:</label>
+                    <input type="text" id="Na" name="Na"><br>
+                    <label for="Mg">Mg:</label>
+                    <input type="text" id="Mg" name="Mg"><br>
+                    <label for="Al">Al:</label>
+                    <input type="text" id="Al" name="Al"><br>
+                </div>
+                <div class="form-column">
+                    <label for="Si">Si:</label>
+                    <input type="text" id="Si" name="Si"><br>
+                    <label for="K">K:</label>
+                    <input type="text" id="K" name="K"><br>
+                    <label for="Ca">Ca:</label>
+                    <input type="text" id="Ca" name="Ca"><br>
+                    <label for="Ba">Ba:</label>
+                    <input type="text" id="Ba" name="Ba"><br>
+                    <label for="Fe">Fe:</label>
+                    <input type="text" id="Fe" name="Fe"><br>
+                </div>
+            </div>
+            <div class="button-container">
+                <button type="button" onclick="submitForm()">Predict</button>
+            </div>
+        </form>
+        <div id="result"></div>
+        <div id="result-image-container">
+            <img id="result-image" src="" alt="Glass Type Image">
+        </div>
+    </div>
+    <script>
+        function submitForm() {
+            const form = document.getElementById('glassForm');
+            const formData = new FormData(form);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            fetch('http://Kkhoa.pythonanywhere.com/analyze_glass', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                const glassTypes = {
+                    0: 'building windows float',
+                    1: 'building windows non float',
+                    2: 'vehicle windows float',
+                    3: 'vehicle windows non float',
+                    4: 'containers',
+                    5: 'tableware',
+                    6: 'headlamps'
+                };
+                const glassTypeImages = {
+                    0: 'static/images/buildingwindowfloat.jpg',
+                    1: 'static/images/buildingwindownonfloat.jpg',
+                    2: 'static/images/vehiclewindowfloat.jpg',
+                    3: 'static/images/vehiclewindownonfloat.jpg',
+                    4: 'static/images/containers.jpg',
+                    5: 'static/images/tableware.jpg',
+                    6: 'static/images/headlamps.jpg'
+                };
+                const glassTypeName = glassTypes[result.result];
+                const glassTypeImage = glassTypeImages[result.result];
+                document.getElementById('result').innerText = glassTypeName;
+                document.getElementById('result').style.fontSize = '36px';
+                document.getElementById('result').style.fontWeight = 'bold';
+                document.getElementById('result-image').src = glassTypeImage;
+                document.getElementById('result-image').style.display = 'block';
+
+                console.log('Image path:', glassTypeImage);
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
